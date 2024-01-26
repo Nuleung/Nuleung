@@ -1,0 +1,131 @@
+local Commander_Module = {}
+
+--///겟서비스\\\--
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+--///오브젝트\\\--
+local MainScript = script.Parent
+local ChepterSelectButton = script.Opning.Select_Screen.SFrame
+local ChepterCode = script:WaitForChild("ChepterSelectCode")
+local CD = script.Parent.CoolTime
+local SFX = game:GetService("SoundService"):WaitForChild("Sfx")
+local Event = ReplicatedStorage:WaitForChild("Chepter1_Storage")
+local TriggerFile = workspace:WaitForChild("Trigger_Part")
+local Chepter1Screen = script:WaitForChild("Part_1Screen")
+
+--///불러오기\\\--
+local Screen_Module = require(MainScript:WaitForChild("Screen_Module"))
+local System_Module = require(MainScript:WaitForChild("System_Module"))
+
+--///챕터오브젝트폴더\\\--
+local Chepter1_Object = {
+	
+}
+local Chepter2_Object = {
+	
+}
+
+task.wait(1)	
+print("커맨더모듈 불러오기 완료!")
+
+--///챕터선택\\\--
+function Commander_Module.Gamecode()
+	for _,v in ChepterSelectButton:GetChildren() do
+		local i = tonumber(v.Name) or error("숫자가 아님")
+		local button:ImageButton = ChepterSelectButton:FindFirstChild(tostring(i)) or error("대상 못 찾음")
+		button.Activated:Connect(function()
+			ChepterCode.Value = i
+			print(i)
+			end)
+		end
+	end
+
+--/////////CHEPTER 1-------------------
+--/////////-------------------
+
+local MovieBar = Chepter1Screen:FindFirstChild("Movie_Bar")
+local Object = Chepter1Screen:FindFirstChild("Object")
+local Say = Chepter1Screen:FindFirstChild("SubTitleText").SubTitle.Text
+--///중재함수\\\--
+task.wait()
+local function Pause(Chepter, TalkProgress, Cooldown, Action)
+	if Chepter == 1 then
+		if TalkProgress == 4 then--형집들어옴
+			task.wait(0.5)
+			SFX.nok:Play()
+			Say.Text = "'문 두드리는 소리'"
+			wait(1.4)
+			CD.Value = false
+			
+		elseif TalkProgress == 9 then
+			Event.ToServer_ActionRemote:FireServer(2785)
+			
+		elseif Action == 2 then
+			Say.Text = Screen_Module.Subcmt1[Action]
+			task.wait(Cooldown)
+			CD.Value = false
+			
+		elseif TalkProgress == 10 then
+			System_Module.NPCActsystem(1)
+			
+			Event.ToServer_ActionRemote:FireServer(3829)
+		elseif Action == 1 then
+			Say.Text = Screen_Module.Subcmt1[Action]
+			System_Module.NPCActsystem(2)
+			CD.Value = false
+			
+		elseif TalkProgress == 19 then
+			Event.ToServer_ActionRemote:FireServer(2918)
+			
+		elseif Action == 3 then--의자에 앉고 컴퓨터 킴
+			Say.Text = Screen_Module.Subcmt1[Action]
+			System_Module.NPCActsystem("Sit")
+			task.wait(0.5)
+			CD.Value = false
+		elseif TalkProgress == 23 then
+			Event.ToServer_ActionRemote:FireServer("ComputerOn")
+			
+		elseif Action == 4 then--점프맵하기
+			
+		elseif Action == 5 then--점프맵스킵
+			CD.Value = false
+		else
+		task.wait(Cooldown)
+		CD.Value = false
+		end
+	end
+end
+
+--///엑션조건\\\--
+function Commander_Module.Chepter1ActionEnabledBoolean(ActCode, Bool)--Enabled형식
+	if ActCode then
+		Chepter1_Object[ActCode].Enabled = Bool
+	else
+		error("올바른 객체를 찾지 못했습니다")
+	end
+end
+
+--///형식분류\\\--
+function Commander_Module.Chepter1ActionVisibleBoolean(WorkCode, Bool_i)--Visible형식
+	if WorkCode then
+		Chepter1_Object[WorkCode].Visible = Bool_i
+	else
+		error("올바른 객체를 찾지 못했습니다")
+	end
+end
+
+--///게임진행관제\\\--(왼쪽부터 순서대로 챕터, 대화진행상황, 대화쿨타임, 행동)
+function Commander_Module.Game_Progress(Chepter, TalkProgress, TalkSpeed, ActionProgress)
+	if TalkProgress ~= 0 then
+		Say.Text = Screen_Module.cmt1[TalkProgress]
+	else
+		print("행동코드"..ActionProgress.." 가 정상작동 되었습니다.")
+	end
+	task.wait(TalkSpeed)
+	Pause(Chepter, TalkProgress, TalkSpeed, ActionProgress)
+end
+
+--/////////-------------------
+--/////////CHEPTER 1-------------------
+
+return Commander_Module
